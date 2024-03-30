@@ -89,17 +89,6 @@ if [ ! -f "$INITALIZED" ]; then
   done
 
   ##
-  # Create GROUPS
-  ##
-  for I_CONF in $(env | grep '^GROUP_')
-  do
-    GROUP_NAME=$(echo "$I_CONF" | sed 's/^GROUP_//g' | sed 's/=.*//g')
-    GROUP_ID=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-    echo ">> GROUP: adding group $GROUP_NAME with GID: $GROUP_ID"
-    addgroup -g "$GROUP_ID" "$GROUP_NAME"
-  done
-
-  ##
   # Create USER ACCOUNTS
   ##
   for I_ACCOUNT in $(env | grep '^ACCOUNT_')
@@ -131,6 +120,19 @@ if [ ! -f "$INITALIZED" ]; then
     
     smbpasswd -e "$ACCOUNT_NAME"
   done
+
+  ##
+  # Create GROUPS
+  ##
+  for I_CONF in $(env | grep '^GROUP_')
+  do
+    GROUP_NAME=$(echo "$I_CONF" | sed 's/^GROUP_//g' | sed 's/=.*//g')
+    GROUP_ID=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+    echo ">> GROUP: adding group $GROUP_NAME with GID: $GROUP_ID"
+    addgroup -g "$GROUP_ID" "$GROUP_NAME"
+  done
+
+  
 
   ##
   # Add USER ACCOUNTS to GROUPS
