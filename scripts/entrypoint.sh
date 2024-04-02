@@ -151,6 +151,15 @@ if [ ! -f "$INITALIZED" ]; then
     unset $(echo "$I_ACCOUNT" | cut -d'=' -f1)
   done
 
+
+##
+## Mone: use custom script `create-fluihome-users.sh` to create users and groups
+## adduser cannot create user with specific uid that has the same numeric value as gid,
+## so we need to create user and group separately
+/container/scripts/create-fluihome-users.sh
+
+
+
   echo '' >> /etc/samba/smb.conf
 
   ##
