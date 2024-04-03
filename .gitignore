@@ -2,3 +2,4 @@ variants
 variants.tar
 .DS_Store
 docker-compose.yml.bak
+scripts/create-fluihome-users.sh

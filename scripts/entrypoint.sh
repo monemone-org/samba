@@ -88,6 +88,19 @@ if [ ! -f "$INITALIZED" ]; then
     echo '   '"$CONF_KEY_VALUE"' = '"$CONF_CONF_VALUE"  >> /etc/samba/smb.conf
   done
 
+##
+## Mone: use custom script `create-fluihome-users.sh` to create users and groups
+## adduser cannot create user with specific uid that has the same numeric value as gid,
+## so we need to create user and group separately
+if [ -f "/container/scripts/create-fluihome-users.sh" ]; then
+  echo ">> ACCOUNT: found custom script to create users and groups"
+  /bin/sh /container/scripts/create-fluihome-users.sh
+  # remove the script after it's done for security
+  rm /container/scripts/create-fluihome-users.sh
+else
+  echo ">> ACCOUNT: custom script to create users and groups not found"
+fi
+
   ##
   # Create USER ACCOUNTS
   ##
@@ -150,13 +163,6 @@ if [ ! -f "$INITALIZED" ]; then
 
     unset $(echo "$I_ACCOUNT" | cut -d'=' -f1)
   done
-
-
-##
-## Mone: use custom script `create-fluihome-users.sh` to create users and groups
-## adduser cannot create user with specific uid that has the same numeric value as gid,
-## so we need to create user and group separately
-/container/scripts/create-fluihome-users.sh
 
 
 
