@@ -4,6 +4,7 @@ samba on alpine
 
 with timemachine, zeroconf (`avahi`) and WSD (Web Services for Devices) (`wsdd2`) support.
 
+Note that there are issues regarding UID/GID Mapping on Docker Desktop - see: https://github.com/ServerContainers/samba/issues/125
 
 ## IMPORTANT!
 
@@ -49,6 +50,21 @@ _all of those variants are automatically build and generated in one go_
 
 ## Changelogs
 
+* 2024-09-22
+    * fixed filename handling for names with special chars
+        * `mangled names = no; dos charset = CP850; unix charset = UTF-8`
+    * added new environment variable to `FAIL_FAST` on user/group creation/errors/conflicts (#139)
+* 2024-07-05
+    * improved github workflow - don't fail if it just skipped the build.
+    * sign images with cosign
+* 2024-05-27
+    * added `.dockerignore` to exlcude unnecessary files and history
+* 2024-05-23
+    * updated github actions (see pull #131)
+    * fixed broken build/version
+* 2024-04-16
+    * added `tzdata` package to support setting the timezone using an env
+        * e.g. `TZ=Europe/Berlin`
 * 2024-03-22
     * merged pull request which fixed avahi on smbd-only and smbd-wsdd2 variants
         * solution was to just deactivate the avahi service and not remove the config folder
@@ -143,6 +159,10 @@ If you experience Problems, take a look at this file: [TROUBLESHOOTING.md](TROUB
     * _optional_ model value of avahi samba service
     * _default:_ `TimeCapsule`
     * some available options are `Xserve`, `PowerBook`, `PowerMac`, `Macmini`, `iMac`, `MacBook`, `MacBookPro`, `MacBookAir`, `MacPro`, `MacPro6,1`, `MacPro7,1` (Tower), `MacPro7,1@ECOLOR=226,226,224` (Rack), `TimeCapsule`, `AppleTV1,1` and `AirPort`.
+
+* __FAIL\_FAST__
+    * _optional_ currently only fails fast if there are conflicts/errors during user/group creation
+    * default not set - set to any value to enable
 
 * __AVAHI\_NAME__
     * _optional_ name of avahi samba service

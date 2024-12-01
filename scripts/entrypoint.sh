@@ -88,6 +88,9 @@ if [ ! -f "$INITALIZED" ]; then
     echo '   '"$CONF_KEY_VALUE"' = '"$CONF_CONF_VALUE"  >> /etc/samba/smb.conf
   done
 
+  # FAIL FAST START
+  [ ! -z ${FAIL_FAST+x} ] && set -e
+
 ##
 ## Mone: use custom script `create-fluihome-users.sh` to create users and groups
 ## adduser cannot create user with specific uid that has the same numeric value as gid,
@@ -100,6 +103,17 @@ if [ -f "/container/scripts/create-fluihome-users.sh" ]; then
 else
   echo ">> ACCOUNT: custom script to create users and groups not found"
 fi
+
+  ##
+  # Create GROUPS
+  ##
+  for I_CONF in $(env | grep '^GROUP_')
+  do
+    GROUP_NAME=$(echo "$I_CONF" | sed 's/^GROUP_//g' | sed 's/=.*//g')
+    GROUP_ID=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+    echo ">> GROUP: adding group $GROUP_NAME with GID: $GROUP_ID"
+    addgroup -g "$GROUP_ID" "$GROUP_NAME"
+  done
 
   ##
   # Create USER ACCOUNTS
@@ -133,18 +147,6 @@ fi
     
     smbpasswd -e "$ACCOUNT_NAME"
   done
-
-  ##
-  # Create GROUPS
-  ##
-  for I_CONF in $(env | grep '^GROUP_')
-  do
-    GROUP_NAME=$(echo "$I_CONF" | sed 's/^GROUP_//g' | sed 's/=.*//g')
-    GROUP_ID=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-    echo ">> GROUP: adding group $GROUP_NAME with GID: $GROUP_ID"
-    addgroup -g "$GROUP_ID" "$GROUP_NAME"
-  done
-
   
 
   ##
@@ -164,6 +166,8 @@ fi
     unset $(echo "$I_ACCOUNT" | cut -d'=' -f1)
   done
 
+  [ ! -z ${FAIL_FAST+x} ] && set +e
+  # FAIL FAST END
 
 
   echo '' >> /etc/samba/smb.conf
