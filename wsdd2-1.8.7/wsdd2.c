@@ -302,7 +302,7 @@ static int open_ep(struct endpoint **epp, struct service *sv, const struct ifadd
 #define __FUNCTION__	"open_ep"
 	const unsigned int disable = 0, enable = 1;
 
-	struct endpoint *ep = (struct endpoint *) calloc(sizeof(*ep), 1);
+	struct endpoint *ep = (struct endpoint *) calloc(1, sizeof(struct endpoint));
 	if ((*epp = ep) == NULL) {
 		errno = ENOMEM;
 		err(EXIT_FAILURE, __FUNCTION__ ": calloc");
@@ -543,7 +543,24 @@ static int netlink_recv(struct endpoint *ep)
 	char buf[PAGE_SIZE];
 	struct sockaddr_nl sa;
 	struct iovec iov = { buf, sizeof buf };
-	struct msghdr msg = { &sa, sizeof sa, &iov, 1, NULL, 0, 0 };
+
+	// void            *__sized_by(msg_namelen) msg_name; /* [XSI] optional address */
+	// socklen_t       msg_namelen;    /* [XSI] size of address */
+	// struct          iovec *msg_iov; /* [XSI] scatter/gather array */
+	// int             msg_iovlen;     /* [XSI] # elements in msg_iov */
+	// void            *__sized_by(msg_controllen) msg_control; /* [XSI] ancillary data, see below */
+	// socklen_t       msg_controllen; /* [XSI] ancillary data buffer len */
+	// int             msg_flags;      /* [XSI] flags on received message */
+	struct msghdr msg = {
+		.msg_name = &sa,
+		.msg_namelen = sizeof(sa),
+		.msg_iov = &iov,
+		.msg_iovlen = 1,
+		.msg_control = NULL,
+		.msg_controllen = 0,
+		.msg_flags = 0
+	};
+	// struct msghdr msg = { &sa, sizeof(sa), &iov, 1, NULL, 0, 0 };
 	ssize_t msglen = recvmsg(ep->sock, &msg, 0);
 
 	DEBUG(2, W, "%s: %zd bytes", __func__, msglen);
