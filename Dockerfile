@@ -1,12 +1,24 @@
-FROM alpine AS wsdd2-builder
+# ENV WSDD2_DIR="wsdd2-master"
+# ARG WSDD2_TAR_URL="https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz"
+ARG WSDD2_DIR="wsdd2-1.8.7"
+ARG WSDD2_TAR_URL="https://github.com/Netgear/wsdd2/archive/refs/tags/1.8.7.tar.gz"
+ARG ALPINE_VER=latest
 
-RUN apk add --no-cache make gcc libc-dev linux-headers && wget -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
- && cd wsdd2-master && make
+FROM alpine:${ALPINE_VER} AS wsdd2-builder
+ARG WSDD2_DIR
+ARG WSDD2_TAR_URL
 
-FROM alpine
+RUN apk add --no-cache make gcc libc-dev linux-headers
+# RUN wget -O - ${WSDD2_TAR_URL} | tar zxvf -
+COPY ./${WSDD2_DIR} /${WSDD2_DIR}
+RUN cd ${WSDD2_DIR} && make
+
+
+FROM alpine:${ALPINE_VER}
 # alpine:3.14
+ARG WSDD2_DIR
 
-COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin
+COPY --from=wsdd2-builder /${WSDD2_DIR}/wsdd2 /usr/sbin
 
 ENV PATH="/container/scripts:${PATH}"
 
